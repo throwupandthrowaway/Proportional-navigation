@@ -1,19 +1,22 @@
 #%% Basic stuff
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib.animation as animation
 import random as random
 
-dt=0.05 #Time step
-T=500. #If the missile hasn't reached target by then, then it knows not where it is at this time.
-N=3 #Navigation constant (2<=N<=5 ideally)
-Vc=40 #Clospning velocity
+dt=0.01 #Time step
+T=1000. #If the missile hasn't reached target by then, then it knows not where it is at this time.
+N=4 #Navigation constant (2<=N<=5 ideally)
+Vc=30 #Closing velocity
 xmpn=np.array([0.,0.]) #Missile position (propnav)
 xmpc=np.array([0.,0.]) #Missile position (pure chase)
-xt=np.array([random.uniform(-1000.,1000.),random.uniform(-1000.,1000.)]) #Target position
+xt=np.array([random.uniform(-10000., 10000.),random.uniform(-10000., 10000.)])
+while np.linalg.norm(xt-xmpn)<500.:
+    xt=np.array([random.uniform(-10000., 10000.),random.uniform(-10000., 10000.)])
+    if np.linalg.norm(xt-xmpn)>500.0:
+        break
 vmpn=Vc*(xt-xmpn)/np.linalg.norm(xt-xmpn) #Missile (propnav) speed vector
 vmpc=Vc*(xt-xmpc)/np.linalg.norm(xt-xmpc) #Missile (pure chase) speed vector
-Vt=30 #Target velocity
+Vt=40 #Target velocity
 theta=random.uniform(0,2*np.pi)
 
 
@@ -21,9 +24,10 @@ theta=random.uniform(0,2*np.pi)
 traj_mpn=[xmpn.copy()]
 traj_t=[xt.copy()]
 traj_mpc=[xmpc.copy()]
+text1=""
 
 for t in np.arange(0,T,dt):
-    theta+=np.random.normal(0.,0.5)*dt
+    theta+=np.random.normal(0.,0.5*np.pi)*dt
     vt=Vt*np.array([np.cos(theta),np.sin(theta)]) #Target speed vector
     xt+=vt*dt
     
@@ -52,27 +56,33 @@ for t in np.arange(0,T,dt):
     traj_t.append(xt.copy())
     traj_mpc.append(xmpc.copy())
     
-    if lospn_norm<5.:
+    if lospn_norm<20. and t<=T:
         print(f"The missile knows where it is: Interception at {t:.2f}s")
+        text1=f"The missile knows where it is: Interception at {t:.2f}s"
         break
-    elif t>=T:
-        print("The missile doesn't know where it is :(")
     
+if text1=="":
+   print("The missile doesn't know where it is :(")
+   text1="Timeout, the missile doesn't know where it is :("
 #%% Plotting
 traj_mpn=np.array(traj_mpn)
 traj_t=np.array(traj_t)
 traj_mpc=np.array(traj_mpc)
 
-fig=plt.figure(figsize=(10,6))
+fig=plt.figure(figsize=(10,8))
 plt.plot(traj_mpn[:,0],traj_mpn[:,1],label="Missile (propnav)")
 plt.plot(traj_mpc[:,0],traj_mpc[:,1],label="Missile (pure chase)")
-plt.plot(traj_t[:,0],traj_t[:,1],label="Target (random trajectory)")
+plt.plot(traj_t[:,0],traj_t[:,1],label="Target (semi-random trajectory)")
 plt.plot(traj_t[-1,0],traj_t[-1,1],"rx",label="Target acquired")
 plt.xlabel("x(m)")
 plt.ylabel("y(m)")
 plt.grid(True)
 plt.axis("equal")
-plt.suptitle("Proportional navigation interception")
-plt.title(f"The missile knows where it is: Interception at {t:.2f}s")
+plt.suptitle("Interception: missile at 30m/s and target at 40m/s")
+text2=str("{:.2f}".format(abs(np.linalg.norm(xmpn[-1]-xmpc[-1]))))+"m"
+text3=str("{:.2f}".format(abs(np.linalg.norm(traj_mpn[0]-traj_t[0]))))+"m"
+plt.title(text1+"\n"+
+          "Distance gain between propnav and pure chase: "+text2+"\n"+
+          "Original distance between missiles and target: "+text3)
 plt.legend()
 plt.show()
