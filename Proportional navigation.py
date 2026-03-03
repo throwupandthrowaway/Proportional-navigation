@@ -11,10 +11,10 @@ a=random.uniform(2,2.5)
 Vc=a*M #Closing velocity
 xmpn=np.array([0.,0.]) #Missile position (propnav)
 xmpc=np.array([0.,0.]) #Missile position (pure chase)
-xt=np.array([random.uniform(-35000., 35000.),random.uniform(-35000., 35000.)])
-while np.linalg.norm(xt-xmpn)<1000.:
-    xt=np.array([random.uniform(-35000., 35000.),random.uniform(-35000., 35000.)])
-    if np.linalg.norm(xt-xmpn)>1000.0:
+xt=np.array([random.uniform(-35400., 35400.),random.uniform(-35400., 35400.)])
+while np.linalg.norm(xt-xmpn)<1000. and np.linalg.norm(xt-xmpn)>35400:
+    xt=np.array([random.uniform(-35400., 35400.),random.uniform(-35400., 35400.)])
+    if np.linalg.norm(xt-xmpn)>1000.0 and np.linalg.norm(xt-xmpn)>35400:
         break
 vmpn=Vc*(xt-xmpn)/np.linalg.norm(xt-xmpn) #Missile (propnav) speed vector
 vmpc=Vc*(xt-xmpc)/np.linalg.norm(xt-xmpc) #Missile (pure chase) speed vector
