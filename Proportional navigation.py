@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import random as random
 
+# Everything is in m/s, even you are in m/s...
 M=1234.8/3.6
 dt=0.01 #Time step
 T=1000. #If the missile hasn't reached target by then, then it knows not where it is at this time.
@@ -81,9 +82,14 @@ plt.xlabel("x(m)")
 plt.ylabel("y(m)")
 plt.grid(True)
 plt.axis("equal")
-plt.suptitle("Interception: missiles at Mach "+str("{:.2F}".format(a))+" and target at Mach "+str("{:.2F}".format(b)))
-text2=str("{:.2f}".format(abs(np.linalg.norm(xmpn[-1]-xmpc[-1]))))+"m"
-text3=str("{:.2f}".format(abs(np.linalg.norm(traj_mpn[0]-traj_t[0]))))+"m"
+
+def result(x):
+    return str("{:.2F}".format(x))
+
+plt.suptitle("Interception: missiles at Mach "+result(a)+" and target at Mach "+result(b))
+text2=result(np.linalg.norm(traj_mpn[-1]-traj_mpc[-1]))+"m (Hypothetical time saved: "+result(np.linalg.norm(traj_mpn[-1]-traj_mpc[-1])/Vc)+"s)"
+# A terribly gross approximation, but it gets the job done
+text3=result(np.linalg.norm(traj_mpn[0]-traj_t[0]))+"m"
 plt.title(text1+"\n"+
           "Distance gain between propnav and pure chase: "+text2+"\n"+
           "Original distance between missiles and target: "+text3)
