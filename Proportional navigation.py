@@ -3,20 +3,23 @@ import numpy as np
 import matplotlib.pyplot as plt
 import random as random
 
+M=1234.8/3.6
 dt=0.01 #Time step
 T=1000. #If the missile hasn't reached target by then, then it knows not where it is at this time.
 N=4 #Navigation constant (2<=N<=5 ideally)
-Vc=30 #Closing velocity
+a=random.uniform(2,2.5)
+Vc=a*M #Closing velocity
 xmpn=np.array([0.,0.]) #Missile position (propnav)
 xmpc=np.array([0.,0.]) #Missile position (pure chase)
-xt=np.array([random.uniform(-10000., 10000.),random.uniform(-10000., 10000.)])
-while np.linalg.norm(xt-xmpn)<500.:
-    xt=np.array([random.uniform(-10000., 10000.),random.uniform(-10000., 10000.)])
-    if np.linalg.norm(xt-xmpn)>500.0:
+xt=np.array([random.uniform(-35000., 35000.),random.uniform(-35000., 35000.)])
+while np.linalg.norm(xt-xmpn)<1000.:
+    xt=np.array([random.uniform(-35000., 35000.),random.uniform(-35000., 35000.)])
+    if np.linalg.norm(xt-xmpn)>1000.0:
         break
 vmpn=Vc*(xt-xmpn)/np.linalg.norm(xt-xmpn) #Missile (propnav) speed vector
 vmpc=Vc*(xt-xmpc)/np.linalg.norm(xt-xmpc) #Missile (pure chase) speed vector
-Vt=40 #Target velocity
+b=random.uniform(1.1,2.35)
+Vt=b*M #Target velocity
 theta=random.uniform(0,2*np.pi)
 
 
@@ -63,7 +66,7 @@ for t in np.arange(0,T,dt):
     
 if text1=="":
    print("The missile doesn't know where it is :(")
-   text1="Timeout, the missile doesn't know where it is :("
+   text1="Timeout ("+str(T)+"s), the missile doesn't know where it is :("
 #%% Plotting
 traj_mpn=np.array(traj_mpn)
 traj_t=np.array(traj_t)
@@ -78,7 +81,7 @@ plt.xlabel("x(m)")
 plt.ylabel("y(m)")
 plt.grid(True)
 plt.axis("equal")
-plt.suptitle("Interception: missile at 30m/s and target at 40m/s")
+plt.suptitle("Interception: missiles at Mach "+str("{:.2F}".format(a))+" and target at Mach "+str("{:.2F}".format(b)))
 text2=str("{:.2f}".format(abs(np.linalg.norm(xmpn[-1]-xmpc[-1]))))+"m"
 text3=str("{:.2f}".format(abs(np.linalg.norm(traj_mpn[0]-traj_t[0]))))+"m"
 plt.title(text1+"\n"+
