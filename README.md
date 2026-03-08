@@ -2,3 +2,6 @@ The missile knows where it is at all times. It knows this because it knows where
 In the event that the position that it is in is not the position that it wasn't, the system has acquired a variation, the variation being the difference between where the missile is, and where it wasn't. If variation is considered to be a significant factor, it too may be corrected by the GEA. However, the missile must also know where it was.
 The missile guidance computer scenario works as follows. Because a variation has modified some of the information the missile has obtained, it is not sure just where it is. However, it is sure where it isn't, within reason, and it knows where it was. It now subtracts where it should be from where it wasn't, or vice-versa, and by differentiating this from the algebraic sum of where it shouldn't be, and where it was, it is able to obtain the deviation and its variation, which is called error.
 <img width="620" height="393" alt="Interception" src="https://github.com/user-attachments/assets/db08c30f-983f-474e-8f44-a38b5b9ff35c" />
+
+https://github.com/user-attachments/assets/1edbc5dc-0f43-47fb-a81c-e069e486e3fa
+
