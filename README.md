@@ -6,4 +6,5 @@ The missile guidance computer scenario works as follows. Because a variation has
 
 https://github.com/user-attachments/assets/1edbc5dc-0f43-47fb-a81c-e069e486e3fa
 
-This whole thing is just the beginning though, so I will keep it 2D for now. At some point I'll get better and make it 3D, then animated, then I will make a real homing device >:)
+This whole thing is just the beginning though, so I will keep it 2D for now. But at some point I'll get better and make it 3D, then animated, then I will make a real homing device with a 12T payload >:)
+Pray to never see the day I get my hands on a warhead
