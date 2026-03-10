@@ -4,7 +4,6 @@ import matplotlib.pyplot as plt
 import random
 import time
 
-start_time=time.time()
 
 # Everything is in m/s, even you are in m/s...
 M=1234.8/3.6
@@ -28,12 +27,14 @@ theta=random.uniform(0,2*np.pi)
 
 
 #%% Big brain time
+start_time=time.time()
 traj_mpn=[xmpn.copy()]
 traj_t=[xt.copy()]
 traj_mpc=[xmpc.copy()]
 text1=""
 
-for t in np.arange(0,T,dt):
+seq=np.arange(0,T,dt)
+for t in seq:
     dtheta=np.random.normal(0.,0.5*np.pi)*dt
     theta=theta+dtheta
     vt=Vt*np.array([np.cos(theta),np.sin(theta)]) #Target speed vector
@@ -67,9 +68,8 @@ for t in np.arange(0,T,dt):
     vmpn+=a_n*dt #Propnav missile speed vector
     xmpn+=vmpn*dt
     
-    traj_mpn.append(xmpn.copy())
-    traj_t.append(xt.copy())
-    traj_mpc.append(xmpc.copy())
+    for traj, var in zip([traj_mpn,traj_t,traj_mpc],[xmpn, xt, xmpc]):
+        traj.append(var.copy())
     
     if lospn_norm<20. and t<=T:
         text1=f"The missile knows where it is: Interception at {t:.2f}s"
@@ -79,9 +79,7 @@ if text1=="":
    print("The missile doesn't know where it is :(")
    text1="Timeout ("+str(T)+"s), the missile doesn't know where it is :("
 #%% Plotting
-traj_mpn=np.array(traj_mpn)
-traj_t=np.array(traj_t)
-traj_mpc=np.array(traj_mpc)
+traj_mpn,traj_t,traj_mpc=map(np.array,[traj_mpn,traj_t,traj_mpc])
 
 fig=plt.figure(figsize=(10,8))
 plt.plot(traj_mpn[0,0],traj_mpn[0,1],"b.",label="Starting point (missiles)")
@@ -125,20 +123,21 @@ plt.title(text1+"\n"+
 plt.legend()
 plt.show()
 
-ex_time=time.time()-start_time
-print("Execution time: %s seconds" % "{:.4f}".format(ex_time))
-if ex_time>10:
-    print("That's a long thinking time mister computer")
     
 length_pn=0
-for i in range(1,len(traj_mpn)):
-    length_pn+=np.linalg.norm(traj_mpn[i]-traj_mpn[i-1])
+diffs_pn=traj_mpn[1:]-traj_mpn[:-1]
+length_pn=np.sum(np.linalg.norm(diffs_pn,axis=1))
 length_pc=0
-for i in range(1,len(traj_mpc)):
-    length_pc+=np.linalg.norm(traj_mpc[i]-traj_mpc[i-1])
+diffs_pc=traj_mpc[1:]-traj_mpc[:-1]
+length_pc=np.sum(np.linalg.norm(diffs_pc,axis=1))
 path_difference=abs(length_pc-length_pn)
 print("Path difference between propnav and pure chase: "+str("{:.2f}".format(path_difference))+"m")
 if path_difference>0:
     print("Longer path for pure chase")
 else:
     print("Longer path for propnav")
+    
+ex_time=time.time()-start_time
+print("Execution time: %s seconds" % "{:.4f}".format(ex_time))
+if ex_time>10:
+    print("That's a long thinking time mister computer")
