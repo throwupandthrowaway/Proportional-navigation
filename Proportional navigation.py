@@ -107,7 +107,7 @@ if int(distance_mpc_t)!=0:
     ratio=Fraction(int(distance_mpn_t),int(distance_mpc_t)) #Good if ratio<1
     ratio=str(ratio.numerator)+"/"+str(ratio.denominator)
 
-if distance_gain>2*Vc and distance_mpn_t<distance_mpc_t:
+if distance_gain>2*(Vc-Vt) and distance_mpn_t<distance_mpc_t:
     print("Distance gain sufficient.")
 elif distance_gain<2*Vc: #It would mean that at this distance, pure chase can catch up in less than 2 seconds
     print("Insufficient distance gain, pure chase is almost as effective.")
@@ -123,7 +123,7 @@ plt.title(text1+"\n"+
 plt.legend()
 plt.show()
 
-    
+
 length_pn=0
 diffs_pn=traj_mpn[1:]-traj_mpn[:-1]
 length_pn=np.sum(np.linalg.norm(diffs_pn,axis=1))
