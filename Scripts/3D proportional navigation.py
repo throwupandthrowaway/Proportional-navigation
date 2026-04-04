@@ -4,11 +4,12 @@ import random
 import time
 
 
-# Everything is in m/s, even you are in m/s...
+# Everything is in m/s
 M=1234.8/3.6
+g=9.81
 dt=0.001 #Time step
 T=1000. #If the missile hasn't reached target by then, then it knows not where it is at this time.
-N=3 #Navigation constant (2<=N<=5 ideally)
+N=3 #Navigation constant (2<=N<=5 from what I read online)
 a=random.uniform(2,2.5)
 Vc=a*M #Closing velocity
 xmpn=np.array([0.,0.,0.]) #Missile position (propnav)
@@ -26,8 +27,26 @@ u0=np.random.randn(3)
 u0=u0/np.linalg.norm(u0)
 vt=Vt*u0
 
-# Initial missile velocity: aimed at target
-vmpn=Vc*(xt-xmpn)/np.linalg.norm(xt-xmpn)
+# Initial missile velocity: collision triangle (resolution of ||\vec{r}+\vec{v_c}t||=||\vec{v_t}t||)
+r=xt-xmpn
+A=Vc**2-Vt**2
+B=-2*np.dot(r,vt)
+C=-np.linalg.norm(r)**2
+
+delta=B**2-4*A*C
+
+if delta>=0 and abs(A)>1e-6:
+    tau1=(-B-np.sqrt(delta))/(2.*A)
+    tau2=(-B+np.sqrt(delta))/(2.*A)
+    taus=[t for t in [tau1, tau2] if t>0.]
+    tau=min(taus) if taus else np.linalg.norm(r)/Vc
+else:
+    tau=np.linalg.norm(r)/Vc
+
+hyp=xt+vt*tau #Hypothetical interception point
+vmpn=Vc*(hyp-xmpn)/np.linalg.norm(hyp-xmpn)
+
+#Initial missile velocity: aimed at target
 vmpc=Vc*(xt-xmpc)/np.linalg.norm(xt-xmpc)
 
 #%% Big brain time
@@ -37,20 +56,28 @@ traj_t=[xt.copy()]
 traj_mpc=[xmpc.copy()]
 text1=""
 
+maneuver_dir=np.random.randn(3)
+maneuver_dir-=np.dot(maneuver_dir,u0)*u0 #Keep normal to initial velocity
+maneuver_dir/=np.linalg.norm(maneuver_dir)
+maneuver_mag=np.random.uniform(0.,12.*g)
+maneuver_timer=0.
+maneuver_duration = np.random.uniform(1.,4.) #Hold maneuver 1–4 s
+
 seq=np.arange(0,T,dt)
 for t in seq:
-    vt_u=vt/np.linalg.norm(vt) #Unitary speed vector (target)
-    rnd=np.random.randn(3) #Random diretion for acceleration
-    rnd=rnd-np.dot(rnd,vt_u)*vt_u
-    rnd_norm=np.linalg.norm(rnd)
-    if rnd_norm>1e-12:
-        rnd_u=rnd/rnd_norm
-    else:
-        rnd_u=np.zeros(3)
-    a_t_mag=abs(np.random.normal(0.,0.5*np.pi))*Vt*dt
-    at=a_t_mag*rnd_u
-    dtheta=np.random.normal(0.,0.5*np.pi)*dt
-    vt=vt+at*dt
+    maneuver_timer+=dt
+    if maneuver_timer>=maneuver_duration:
+        maneuver_timer=0.
+        maneuver_duration=np.random.uniform(1.5,4.)
+        vt_u=vt/np.linalg.norm(vt)
+        maneuver_dir=np.random.randn(3)
+        maneuver_dir-=np.dot(maneuver_dir,vt_u)*vt_u  #Strictly normal to velocity
+        n=np.linalg.norm(maneuver_dir)
+        maneuver_dir=maneuver_dir/n if n > 1.e-12 else np.zeros(3)
+        maneuver_mag=np.random.uniform(3.*g,9.*g)
+
+    at=maneuver_mag*maneuver_dir    
+    vt+=at*dt
     vt=Vt*vt/np.linalg.norm(vt)
     xt+=vt*dt
     
@@ -58,7 +85,7 @@ for t in seq:
     lospn_norm=np.linalg.norm(lospn)
     lospn_u=lospn/lospn_norm #lospn unitary vector direction
     
-    lospc=xt-xmpc #lospn vectpr (pure chase)
+    lospc=xt-xmpc #los vector (pure chase)
     lospc_norm=np.linalg.norm(lospc)
     lospc_u=lospc/lospc_norm
     
@@ -68,7 +95,9 @@ for t in seq:
     v_rel=vt-vmpn #Relative speed between missile and target
     omega_los=np.cross(lospn,v_rel)/(lospn_norm**2)
     vmpn_u=vmpn/np.linalg.norm(vmpn)
-    a_n=N*Vc*np.cross(omega_los,vmpn_u)
+    at_normal_to_los=at-np.dot(at,lospn_u)*lospn_u  #Project out LOS component
+    nt=at_normal_to_los/np.linalg.norm(at_normal_to_los) if np.linalg.norm(at_normal_to_los) > 1e-12 else np.zeros(3) #Target acceleration normal to LOS
+    a_n=N*Vc*np.cross(omega_los,vmpn_u)+N*nt/2
     vmpn+=a_n*dt
     xmpn+=vmpn*dt
     lambda_p=(lospn[0]*v_rel[1] - lospn[1]*v_rel[0])/lospn_norm**2 #lospn rate
@@ -87,40 +116,28 @@ if text1=="":
 ex_time=time.time()-start_time
 print("Loop execution time: %s seconds" % "{:.4f}".format(ex_time))
 if ex_time>10:
-    print("That's a long thinking time mister computer")
+    print("That's a long thinking time")
 #%% Plotting
 import matplotlib.pyplot as plt
-traj_mpn, traj_t, traj_mpc = map(np.array, [traj_mpn, traj_t, traj_mpc])
+traj_mpn,traj_t,traj_mpc=map(np.array,[traj_mpn,traj_t,traj_mpc])
 
-fig = plt.figure(figsize=(10, 8))
-ax = fig.add_subplot(111, projection="3d")
+fig=plt.figure(figsize=(10,8))
+ax=fig.add_subplot(111,projection="3d")
 
-ax.plot(
-    [traj_mpn[0, 0]], [traj_mpn[0, 1]], [traj_mpn[0, 2]],
-    "b.", label="Starting point (missiles)"
-)
-ax.plot(
-    [traj_t[0, 0]], [traj_t[0, 1]], [traj_t[0, 2]],
-    "g.", label="Starting point (target)"
-)
+ax.plot([traj_mpn[0, 0]],[traj_mpn[0,1]],[traj_mpn[0,2]],
+        "b.",label="Starting point (missiles)")
+ax.plot([traj_t[0, 0]],[traj_t[0,1]],[traj_t[0,2]],
+        "g.",label="Starting point (target)")
 
-ax.plot(
-    traj_mpn[:, 0], traj_mpn[:, 1], traj_mpn[:, 2],
-    label="Missile (propnav)"
-)
-ax.plot(
-    traj_mpc[:, 0], traj_mpc[:, 1], traj_mpc[:, 2],
-    label="Missile (pure chase)"
-)
-ax.plot(
-    traj_t[:, 0], traj_t[:, 1], traj_t[:, 2],
-    label="Target (semi-random trajectory)"
-)
+ax.plot(traj_mpn[:,0],traj_mpn[:,1],traj_mpn[:,2],
+        label="Missile (propnav)")
+ax.plot(traj_mpc[:,0],traj_mpc[:,1],traj_mpc[:,2],
+        label="Missile (pure chase)")
+ax.plot(traj_t[:,0],traj_t[:,1],traj_t[:,2],
+        label="Target (semi-random trajectory)")
 
-ax.plot(
-    [traj_t[-1, 0]], [traj_t[-1, 1]], [traj_t[-1, 2]],
-    "rD", label="Final target position"
-)
+ax.plot([traj_t[-1,0]],[traj_t[-1,1]],[traj_t[-1,2]],
+        "rD",label="Interception point")
 
 ax.set_xlabel("x (m)")
 ax.set_ylabel("y (m)")
@@ -137,35 +154,27 @@ plt.suptitle(
 ax.legend()
 
 #%% Result analysis
-distance_gain = np.linalg.norm(traj_mpn[-1] - traj_mpc[-1])
+distance_gain=np.linalg.norm(traj_mpn[-1]-traj_mpc[-1])
+distance_mpn_t=np.linalg.norm(traj_mpn[-1]-traj_t[-1]) #Distance between propnav missile and target
+distance_mpc_t=np.linalg.norm(traj_mpc[-1]-traj_t[-1]) #Distance between pure chase missile and target
 
-# Final distances to target
-distance_mpn_t = np.linalg.norm(traj_mpn[-1] - traj_t[-1])
-distance_mpc_t = np.linalg.norm(traj_mpc[-1] - traj_t[-1])
+print("Minimum distance gain to be more efficient than pure chase: "+str("{:.2f}".format(2*Vc))+"m")
+from fractions import Fraction
+ratio=""
+if int(distance_mpc_t)!=0:
+    ratio=Fraction(int(distance_mpn_t),int(distance_mpc_t)) #Good if ratio<1
+    ratio=str(ratio.numerator)+"/"+str(ratio.denominator)
 
-print("Minimum distance gain to be more efficient than pure chase: "
-      + str("{:.2f}".format(2 * (Vc - Vt))) + " m")
-
-if distance_mpc_t > 1e-12:
-    ratio = distance_mpn_t / distance_mpc_t   # good if ratio < 1
-    ratio_text = "{:.3f}".format(ratio)
-else:
-    ratio = np.inf
-    ratio_text = "undefined"
-
-if distance_gain > 2 * (Vc - Vt) and distance_mpn_t < distance_mpc_t:
+if distance_gain>2*Vc and distance_mpn_t<distance_mpc_t:
     print("Distance gain sufficient.")
-elif distance_gain < 2 * (Vc - Vt) and distance_mpn_t < distance_mpc_t:
-    print("Propnav is better, but the distance gain is small.")
-elif distance_mpn_t > distance_mpc_t:
-    print("Pure chase missile is closer to target than propnav missile "
-          + "(ratio distance_mpn_t/distance_mpc_t: " + ratio_text + ")")
-else:
-    print("Comparable end-state between propnav and pure chase.")
-
-text2 = str("{:.2f}".format(distance_gain)) + " m"
-text3 = str("{:.2f}".format(np.linalg.norm(traj_t[0] - traj_mpn[0]))) + " m"
-
+elif distance_gain<2*Vc: #It would mean that at this distance, pure chase can catch up in less than 2 seconds
+    print("Insufficient distance gain, pure chase is almost as effective.")
+elif distance_mpn_t>distance_mpc_t:
+    print("Pure chase missile closer to target than propnav missile (ratio distance_mpn_t/distance_mpc_t: "+ratio+")")
+elif distance_gain<2*Vc and distance_mpn_t>distance_mpc_t:
+    print("Proportional navigation absolutely useless wtf")
+text2=str("{:.2f}".format(distance_gain))+"m"
+text3=str("{:.2f}".format(np.linalg.norm(traj_t[0])))+"m"
 plt.title(
     text1 + "\n"
     + "Distance gain between propnav and pure chase: " + text2 + "\n"
@@ -175,29 +184,16 @@ plt.title(
 plt.legend()
 plt.show()
 
-# Path lengths
-diffs_pn = traj_mpn[1:] - traj_mpn[:-1]
-length_pn = np.sum(np.linalg.norm(diffs_pn, axis=1))
-
-diffs_pc = traj_mpc[1:] - traj_mpc[:-1]
-length_pc = np.sum(np.linalg.norm(diffs_pc, axis=1))
-
-path_difference = length_pc - length_pn
-
-print("Path length (propnav): " + str("{:.2f}".format(length_pn)) + " m")
-print("Path length (pure chase): " + str("{:.2f}".format(length_pc)) + " m")
-print("Path difference between pure chase and propnav: "
-      + str("{:.2f}".format(abs(path_difference))) + " m")
-
-if path_difference > 0:
+length_pn=0
+diffs_pn=traj_mpn[1:]-traj_mpn[:-1]
+length_pn=np.sum(np.linalg.norm(diffs_pn,axis=1))
+length_pc=0
+diffs_pc=traj_mpc[1:]-traj_mpc[:-1]
+length_pc=np.sum(np.linalg.norm(diffs_pc,axis=1))
+path_difference=abs(length_pc-length_pn)
+print("Path difference between propnav and pure chase: "+str("{:.2f}".format(path_difference))+"m")
+if path_difference>0:
     print("Longer path for pure chase")
-elif path_difference < 0:
-    print("Longer path for propnav")
 else:
-    print("Same path length")
-
-# More meaningful performance metric
-target_distance_gain = distance_mpc_t - distance_mpn_t
-print("Gain relative to target: " + str("{:.2f}".format(target_distance_gain)) + " m")
-
-plt.show()
+    print("Longer path for propnav")
+    
