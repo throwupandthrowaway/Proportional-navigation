@@ -6,4 +6,4 @@ This personal project was originally a self-imposed exercise with the intention 
 Apart from this navigation configuration and the simple tail-chase model, I'd be very interested to try other more effective navigation models.
 
 <img width="620" height="393" src="https://github.com/user-attachments/assets/db08c30f-983f-474e-8f44-a38b5b9ff35c" alt="An old simulation, but it does the job"/>
-![New model](Images/to/3DInterception.1.1.png?raw=true "3D model")
+![New model](Images/3DInterception.1.1.png/to/3DInterception.1.1.png?raw=true "3D model")
