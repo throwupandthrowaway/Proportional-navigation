@@ -1,17 +1,10 @@
-04/04/2026: 3D modelization has been achieved!!!
+04/04/2026: 3D modelization has been achieved
 
 
-The missile knows where it is at all times. It knows this because it knows where it isn't. By subtracting where it is from where it isn't, or where it isn't from where it is (whichever is greater), it obtains a difference, or deviation. The guidance subsystem uses deviations to generate corrective commands to drive the missile from a position where it is to a position where it isn't, and arriving at a position where it wasn't, it now is. Consequently, the position where it is, is now the position that it wasn't, and it follows that the position that it was, is now the position that it isn't.
-In the event that the position that it is in is not the position that it wasn't, the system has acquired a variation, the variation being the difference between where the missile is, and where it wasn't. If variation is considered to be a significant factor, it too may be corrected by the GEA. However, the missile must also know where it was.
-The missile guidance computer scenario works as follows. Because a variation has modified some of the information the missile has obtained, it is not sure just where it is. However, it is sure where it isn't, within reason, and it knows where it was. It now subtracts where it should be from where it wasn't, or vice-versa, and by differentiating this from the algebraic sum of where it shouldn't be, and where it was, it is able to obtain the deviation and its variation, which is called error.
+This personal project was originally a self-imposed exercise with the intention to improve my coding skills on Python. The code aims to simulate the behaviour of a fire-and-forget interception missile, using proportional navigation. Extensive research on the basic principles of proportional navigation has been made, with documentary resources ranging from YouTube videos to academic writings on the matter. Though very rudimentary and so far limited to a static 3D model, I hope to learn new ways to improve the flight path and optimize the compilation.
 
-
-Little did you know that this copypasta has nothing to do with proportional navigation, it's actually about inertial navigation for the Tomahawk.
+Apart from this navigation configuration and the simple tail-chase model, I'd be very interested to try other more effective navigation models.
 
 <img width="620" height="393" src="https://github.com/user-attachments/assets/db08c30f-983f-474e-8f44-a38b5b9ff35c" alt="An old simulation, but it does the job"/>
 
 https://github.com/user-attachments/assets/1edbc5dc-0f43-47fb-a81c-e069e486e3fa
-
-This whole thing is just the beginning though, but at some point I'll get better and make it animated, then I will make a real homing device with a 12T payload >:)
-
-Pray to never see the day I get my hands on a warhead
