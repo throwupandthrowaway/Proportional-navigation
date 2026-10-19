@@ -5,10 +5,10 @@ import random
 import time
 
 
-# Everything is in m/s, even you are in m/s...
+# Everything is in m/s
 M=1234.8/3.6
 dt=0.001 #Time step
-T=1000. #If the missile hasn't reached target by then, then it knows not where it is at this time.
+T=1000. #Timeout
 N=3 #Navigation constant (2<=N<=5 ideally)
 a=random.uniform(2,2.5)
 Vc=a*M #Closing velocity
@@ -50,7 +50,7 @@ for t in seq:
     lospn_norm=np.linalg.norm(lospn)
     lospn_u=lospn/lospn_norm #lospn unitary vector direction
     
-    lospc=xt-xmpc #lospn vectpr (pure chase)
+    lospc=xt-xmpc #lospn vector (pure chase)
     lospc_norm=np.linalg.norm(lospc)
     lospc_u=lospc/lospc_norm
     
@@ -140,4 +140,4 @@ else:
 ex_time=time.time()-start_time
 print("Execution time: %s seconds" % "{:.4f}".format(ex_time))
 if ex_time>10:
-    print("That's a long thinking time mister computer")
+    print("Heavy compilation on this run")
