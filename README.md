@@ -1,7 +1,7 @@
 04/04/2026: 3D modelization has been achieved
 
 
-This personal project was originally a self-imposed exercise with the intention to improve my coding skills on Python. The code aims to simulate the behaviour of a fire-and-forget interception missile, using proportional navigation. Extensive research on the basic principles of proportional navigation has been made, with documentary resources ranging from YouTube videos to academic writings on the matter. Though very rudimentary and so far limited to a static 3D model, I hope to learn new ways to improve the flight path and optimize the compilation. One of the first changes that I'd like to implement is the acceleration profile of a real homing device.
+This personal project was originally a self-imposed exercise with the intention to improve my coding skills on Python. The code aims to simulate the behaviour of a fire-and-forget interception missile, using proportional navigation. Extensive research on the basic principles of proportional navigation has been made, with documentary resources ranging from YouTube videos to academic writings on the matter. Though very rudimentary and so far limited to a static 3D model, I hope to learn new ways to improve the flight path and optimize the compilation. One of the first changes that I'd like to implement is the acceleration profile of a real homing device (an example I have stumbled upon can be found in the "Goals" folder).
 
 Apart from this navigation configuration and the simple tail-chase model, I'd be very interested to try other more effective navigation models.
 
